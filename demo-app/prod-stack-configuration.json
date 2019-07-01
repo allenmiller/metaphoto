@@ -1,0 +1,9 @@
+{
+  "Parameters" : {
+    "DBName" : "ProdWordPressDB",
+    "DBPassword" : "password",
+    "DBRootPassword" : "ProdDBRootPassword",
+    "DBUser" : "ProdDBuser",    
+    "KeyName" : "ajmiller_id_rsa"
+  }
+}
