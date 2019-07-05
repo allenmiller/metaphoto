@@ -133,3 +133,7 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
+
+Outputs:
+  PipelineArtifactsBucketArn: !GetAtt PipelineArtifactsBucket.Arn
+
