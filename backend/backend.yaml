@@ -4,6 +4,20 @@ Description: github-codepipeline-app
 
 # This is just here as an example resource
 
-Resources:
-  ApplicationBucket:
-    Type: AWS::S3::Bucket
+  MetaphotoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: MediaId
+          AttributeType: S
+        - AttributeName: MediaType
+          AttributeType: S
+      KeySchema:
+        - AttributeName: MediaId
+          KeyType: HASH
+        - AttributeName: MediaType
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: metaphoto
