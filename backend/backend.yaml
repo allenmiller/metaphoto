@@ -1,9 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 # *** Change this to something useful for you!
-Description: github-codepipeline-app
+Description: Metaphoto backend infrastructure and applications
 
 # This is just here as an example resource
 
+Resources:
   MetaphotoDB:
     Type: AWS::DynamoDB::Table
     Properties:
