@@ -135,5 +135,5 @@ Resources:
         - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
 
 Outputs:
-  PipelineArtifactsBucketArn: !GetAtt PipelineArtifactsBucket.Arn
+  PipelineArtifactsBucketArn: !GetAtt PipelineArtifactsBucket
 
