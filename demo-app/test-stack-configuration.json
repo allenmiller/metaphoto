@@ -1,9 +1,0 @@
-{
-  "Parameters" : {
-    "DBName" : "TestWordPressDB",
-    "DBPassword" : "passwords",
-    "DBRootPassword" : "TestDBRootPassword",
-    "DBUser" : "TestDBuser",    
-    "KeyName" : "ajmiller_id_rsa"
-  }
-}
