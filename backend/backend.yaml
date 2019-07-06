@@ -22,3 +22,11 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
       TableName: metaphoto
+  PostLambda:
+    Type:  AWS::Lambda::Function
+    Properties:
+      Description: Lambda to handle POST API calls
+      Code:
+        S3Bucket: !ImportValue MetaphotoPipelineArtifactsBucket
+        S3Key: metaphotoPost.js
+        Runtime: nodejs10.x

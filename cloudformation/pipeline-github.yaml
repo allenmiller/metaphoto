@@ -135,5 +135,8 @@ Resources:
         - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
 
 Outputs:
-  PipelineArtifactsBucketArn: !GetAtt PipelineArtifactsBucket
-
+  ArtifactBucket:
+    Description: Bucket to hold build artifacts
+    Value: !Ref PipelineArtifactsBucket
+    Export:
+      Name: MetaphotoPipelineArtifactsBucket
