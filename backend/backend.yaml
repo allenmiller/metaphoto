@@ -30,3 +30,4 @@ Resources:
         S3Bucket: !ImportValue MetaphotoPipelineArtifactsBucket
         S3Key: metaphotoPost.js
       Runtime: nodejs10.x
+      Hanlder: handler
