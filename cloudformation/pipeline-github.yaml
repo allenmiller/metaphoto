@@ -88,7 +88,7 @@ Resources:
                 Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CloudformationRole.Arn
                 StackName: !Ref ApplicationStackName
-                TemplatePath: !Sub "SourceCode::services/dynamodb/serverless.yaml"
+                TemplatePath: !Sub "SourceCode::services/dynamodb"
               RunOrder: 1
 
   # 'GithubWebhook' satisfies two requirements:
