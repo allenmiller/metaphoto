@@ -45,29 +45,6 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
-  FilmTable:
-    Type: 'AWS::DynamoDB::Table'
-    DeletionPolicy: Retain
-    Properties:
-      TableName: FilmTable
-      AttributeDefinitions:
-        -
-          AttributeName: objectId
-          AttributeType: S
-        -
-          AttributeName: objectType
-          AttributeType: S
-      KeySchema:
-        -
-          AttributeName: objectId
-          KeyType: HASH
-        -
-          AttributeName: objectType
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
-
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -96,7 +73,7 @@ Resources:
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
         # Build and Deploy, etc., stages would follow. Here is an example
-        - Name: Deploy
+        - Name: DeployDatabase
           Actions:
             - Name: CloudFormationDeploy
               ActionTypeId:
@@ -111,7 +88,7 @@ Resources:
                 Capabilities: CAPABILITY_IAM
                 RoleArn: !GetAtt CloudformationRole.Arn
                 StackName: !Ref ApplicationStackName
-                TemplatePath: !Sub "SourceCode::backend/backend.yaml"
+                TemplatePath: !Sub "SourceCode::services/dynamodb/serverless.yaml"
               RunOrder: 1
 
   # 'GithubWebhook' satisfies two requirements:
@@ -163,9 +140,3 @@ Outputs:
     Value: !Ref MetaphotoPipelineArtifactsBucket
     Export:
       Name: MetaphotoPipelineArtifactsBucket
-
-  FilmTable:
-    Description: DynamoDB table containing film and holder data
-    Value: !Ref FilmTable
-    Export:
-      Name: FilmTable
