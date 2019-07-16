@@ -1,10 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
-# *** Change this to something useful for you!
 Description: Shared infrastructure for Metaphoto, including build pipelines, dynamodb tables, S3 buckets, and IAM roles
 
 Parameters:
-  # *** This value must always be passed in when creating / updating stack
-  # "NoEcho" is set to true, for security, so token won't be visible when examining the resulting stack
+  Environment:
+    AllowedValues:
+      - dev
+      - prod
+    Description: 'Environment'
+    Type: 'String'
+    Default: 'dev'
+
   GitHubOAuthToken:
     Type: String
     NoEcho: true
@@ -12,11 +17,6 @@ Parameters:
     MaxLength: 40
     AllowedPattern: '[a-z0-9]*'
 
-  # *** The remaining parameters should either be:
-  # - overridden via changing "Default" here (PREFERABLE, since then they're in source control)
-  # - or you can pass them in when creating / updating the stack
-
-  # *** The owner of the Github repo for this application.
   GitHubOwner:
     Type: String
     Default: allenmiller
@@ -32,7 +32,6 @@ Parameters:
     Default: master
     AllowedPattern: "[A-Za-z0-9-]+"
 
-  # *** The stack name for the actual application we're deploying
   ApplicationStackName:
     Type: String
     Default: metaphoto
@@ -44,6 +43,23 @@ Resources:
     Properties:
       VersioningConfiguration:
         Status: Enabled
+
+  DynamoDbCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: DynamoDbCodeBuildProject
+      Description: Build the DynamoDB database.
+      ServiceRole: !Ref DynamoDbCodeBuildRole
+      TimeoutInMinutes: 5
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: services/dynamodb/buildspec.yml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:10.1.0
+      Artifacts:
+        Type: CODEPIPELINE
 
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -72,24 +88,20 @@ Resources:
                 PollForSourceChanges: false
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
-        # Build and Deploy, etc., stages would follow. Here is an example
+
         - Name: DeployDatabase
           Actions:
-            - Name: CloudFormationDeploy
+            - Name: BuildDynamoDatabase
+              RunOrder: 1
               ActionTypeId:
-                Category: Deploy
+                Category: Build
                 Owner: AWS
-                Provider: CloudFormation
+                Provider: CodeBuild
                 Version: '1'
               InputArtifacts:
                 - Name: SourceCode
               Configuration:
-                ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_IAM
-                RoleArn: !GetAtt CloudformationRole.Arn
-                StackName: !Ref ApplicationStackName
-                TemplatePath: !Sub "SourceCode::services/dynamodb"
-              RunOrder: 1
+                ProjectName: !Ref DynamoDbCodeBuildProject
 
   # 'GithubWebhook' satisfies two requirements:
   # -- Means that updates are pushed from GitHub, rather than AWS having to poll
@@ -108,31 +120,196 @@ Resources:
       TargetAction: Source
       TargetPipelineVersion: !GetAtt CodePipeline.Version
 
-  CodePipelineRole:
-    Type: AWS::IAM::Role
+  CodeBuildRole:
+    Type: "AWS::IAM::Role"
     Properties:
+      RoleName:
+        'Fn::Join': [ "", ["CodeBuildRole", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Effect: Allow
+          Effect: "Allow"
           Principal:
-            Service: codepipeline.amazonaws.com
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
+            Service: "codebuild.amazonaws.com"
+          Action: "sts:AssumeRole"
 
-  CloudformationRole:
-    Type: AWS::IAM::Role
+  CodePipelineRole:
+    Type: "AWS::IAM::Role"
     Properties:
+      RoleName: !Join [ "-", ["CodePipelineRole", !Ref 'AWS::StackName', !Ref 'Environment']]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Effect: Allow
+          Effect: "Allow"
           Principal:
-            Service: cloudformation.amazonaws.com
-          Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AdministratorAccess #TODO: Reduce permissions
+            Service: "codepipeline.amazonaws.com"
+          Action: "sts:AssumeRole"
+
+  DynamoDbCodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", ["DynamoDbCodeBuildRole", !Ref "AWS::StackName"] ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: "codebuild.amazonaws.com"
+          Action: "sts:AssumeRole"
+
+  DynamoDBCodeBuildPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join [ "-", ["DynamoDbCodeBuildPolicy", !Ref "AWS::StackName"] ]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - DynamoDB:CreateTable
+            - DynamoDB:DescribeTable
+            - DynamoDB:TagResource
+          Resource: "*"
+      Roles:
+        - !Ref DynamoDbCodeBuildRole
+
+  LoggingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["LoggingPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogGroups
+            - logs:FilterLogEvents
+            - logs:DescribeLogStreams
+            - logs:DeleteLogGroup
+          Resource: "*"
+      Roles:
+        - !Ref DynamoDbCodeBuildRole
+
+  CodebuildCloudformationPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["CodebuildCloudformationPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - Cloudformation:DescribeStacks
+            - Cloudformation:DescribeStackEvents
+            - Cloudformation:DescribeStackResource
+            - Cloudformation:ListStackResources
+            - Cloudformation:ValidateTemplate
+            - Cloudformation:CreateStack
+            - Cloudformation:CreateUploadBucket
+            - Cloudformation:DeleteStack
+            - Cloudformation:UpdateStack
+          Resource: "*"
+      Roles:
+        - !Ref DynamoDbCodeBuildRole
+
+  S3PutGetPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["S3PutGetPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - S3:ListBucket
+            - S3:GetObject
+            - S3:PutObject
+          Resource: "*"
+      Roles:
+        - !Ref DynamoDbCodeBuildRole
+
+  S3CreatePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["S3CreatePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - s3:CreateBucket
+            - s3:PutEncryptionConfiguration
+          Resource: "*"
+      Roles:
+        - !Ref DynamoDbCodeBuildRole
+
+  CodeBuildPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["CodeBuildPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - codebuild:*
+            - lambda:Get*
+            - lambda:List*
+            - lambda:CreateFunction
+            - lambda:AddPermission
+            - lambda:CreateAlias
+            - lambda:DeleteFunction
+            - lambda:InvokeFunction
+            - lambda:PublishVersion
+            - lambda:RemovePermission
+            - lambda:Update*
+            - apigateway:GET
+            - apigateway:POST
+            - apigateway:PUT
+            - apigateway:DELETE
+            - s3:DeleteBucket
+            - s3:ListBucketVersions
+            - iam:PassRole
+            - iam:GetRole
+            - iam:CreateRole
+            - iam:PutRolePolicy
+            - iam:DeleteRolePolicy
+            - iam:DeleteRole
+            - cloudwatch:GetMetricStatistics
+            - events:Put*
+            - events:Remove*
+            - events:Delete*
+          Resource: "*"
+      Roles:
+        - !Ref CodeBuildRole
+
+  CodePipelinePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["CodePipelinePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - s3:*
+            - codebuild:*
+          Resource:
+            - "*"
+      Roles:
+        - !Ref CodePipelineRole
 
 Outputs:
   MetaphotoPipelineArtifactsBucket:
