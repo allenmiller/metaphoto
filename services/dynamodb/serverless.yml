@@ -12,7 +12,8 @@ provider:
   runtime: nodejs10.x
   stage: dev
   region: us-west-1
-  deploymentBucket: !ImportValue MetaphotoPipelineArtifactsBucket
+  deploymentBucket:
+    - 'Fn::ImportValue': MetaphotoPipelineArtifactsBucket
 
 resources:
   Resources:
