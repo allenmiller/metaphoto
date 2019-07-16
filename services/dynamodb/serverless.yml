@@ -12,7 +12,7 @@ provider:
   runtime: nodejs10.x
   stage: dev
   region: us-west-1
-  deploymentBucket: net.ajmiller.${self:provider.region}.serverless.deployments
+  deploymentBucket: !ImportValue MetaphotoPipelineArtifactsBucket
 
 resources:
   Resources:
