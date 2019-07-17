@@ -270,6 +270,7 @@ Resources:
           Effect: Allow
           Action:
             - S3:ListBucket
+            - S3:GetBucketLocation
             - S3:GetObject
             - S3:PutObject
           Resource: "*"
@@ -277,22 +278,21 @@ Resources:
         - !Ref DynamoDbCodeBuildRole
         - !Ref LambdaCodeBuildRole
 
-  S3CreatePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName:
-        'Fn::Join': [ "", ["S3CreatePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: Allow
-          Action:
-            - S3:CreateBucket
-            - S3:PutEncryptionConfiguration
-            - S3:GetBucketLocation
-          Resource: "*"
-      Roles:
-        - !Ref DynamoDbCodeBuildRole
+# S3CreatePolicy:
+#    Type: "AWS::IAM::Policy"
+#    Properties:
+#      PolicyName:
+#        'Fn::Join': [ "", ["S3CreatePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+#      PolicyDocument:
+#        Version: "2012-10-17"
+#        Statement:
+#          Effect: Allow
+#          Action:
+#            - S3:CreateBucket
+#            - S3:PutEncryptionConfiguration
+#          Resource: "*"
+#      Roles:
+#        - !Ref DynamoDbCodeBuildRole
 
   LambdaCodeBuildPolicy:
     Type: "AWS::IAM::Policy"

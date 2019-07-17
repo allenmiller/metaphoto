@@ -23,13 +23,13 @@ resources:
   Outputs:
     RestApiId:
       Value:
-        Ref: RestApiId
+        Ref: ApiGatewayRestApi
       Export:
         Name: RestApiId
 
     RestApiRootResourceId:
       Value:
         Fn::GetAtt:
-          - RestApiId
+          - ApiGatewayRestApi
           - RootResourceId
       Export: RootResourceId
