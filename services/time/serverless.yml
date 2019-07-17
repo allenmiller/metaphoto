@@ -32,4 +32,5 @@ resources:
         Fn::GetAtt:
           - ApiGatewayRestApi
           - RootResourceId
-      Export: RootResourceId
+      Export:
+        Name: RootResourceId
