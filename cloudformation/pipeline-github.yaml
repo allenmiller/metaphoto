@@ -306,6 +306,7 @@ Resources:
           Action:
             - IAM:CreateRole
             - IAM:GetRole
+            - IAM:GetRolePolicy
             - IAM:PutRolePolicy
             - IAM:DeleteRolePolicy
             - IAM:DeleteRole
@@ -314,6 +315,7 @@ Resources:
             - apigateway:POST
             - apigateway:PUT
             - apigateway:DELETE
+            - apigateway:PATCH
             - lambda:Get*
             - lambda:List*
             - lambda:CreateFunction
