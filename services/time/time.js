@@ -1,6 +1,5 @@
-var time = require('services/time/time');
 exports.handler = (event, context, callback) => {
-    var currentTime = new time.Date();
+    var currentTime = new Date();
     currentTime.setTimezone("America/Los_Angeles");
     callback(null, {
         statusCode: '200',

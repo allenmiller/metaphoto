@@ -257,6 +257,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
+        - !Ref LambdaCodeBuildRole
 
   S3PutGetPolicy:
     Type: "AWS::IAM::Policy"
@@ -274,6 +275,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
+        - !Ref LambdaCodeBuildRole
 
   S3CreatePolicy:
     Type: "AWS::IAM::Policy"

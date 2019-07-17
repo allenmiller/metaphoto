@@ -14,10 +14,10 @@ functions:
   get:
     handler: time.handler
     events:
-      http:
-        path: time
-        method: get
-        cors: true
+      - http:
+          path: time
+          method: get
+          cors: true
 
 resources:
   Outputs:
