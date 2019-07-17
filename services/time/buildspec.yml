@@ -8,4 +8,4 @@ phases:
   build:
     commands:
       - cd services/time
-      - serverless deploy -v
+      - serverless deploy
