@@ -53,7 +53,7 @@ Resources:
       TimeoutInMinutes: 5
       Source:
         Type: CODEPIPELINE
-        BuildSpec: services/dynamodb/buildspec.yml
+        BuildSpec: resources/dynamodb/buildspec.yml
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
@@ -103,9 +103,6 @@ Resources:
               Configuration:
                 ProjectName: !Ref DynamoDbCodeBuildProject
 
-  # 'GithubWebhook' satisfies two requirements:
-  # -- Means that updates are pushed from GitHub, rather than AWS having to poll
-  # -- Means we can filter for required changes
   GithubWebhook:
     Type: 'AWS::CodePipeline::Webhook'
     Properties:
