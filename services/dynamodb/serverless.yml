@@ -12,7 +12,7 @@ provider:
   runtime: nodejs10.x
   stage: dev
   region: us-west-1
-  deploymentBucket: net.ajmiller.testdeploy
+  deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
 
 resources:
   Resources:
