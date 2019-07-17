@@ -37,6 +37,10 @@ Parameters:
     Default: metaphoto
     AllowedPattern: "[A-Za-z0-9-]+"
 
+  HostedZoneDnsName:
+    Type: String
+    Default: metaphoto.ajmiller.net
+
 Resources:
   MetaphotoPipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -49,7 +53,7 @@ Resources:
     Properties:
       HostedZoneConfig:
         Comment: Hosted zone for metaphoto.ajmiller.net
-      Name: metaphoto.ajmiller.net
+      Name: !Ref HostedZoneDnsName
 
   DynamoDbCodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -386,7 +390,7 @@ Outputs:
   MetaphotoHostedZoneNameServers:
     Description: Hosted zone for metaphoto.ajmiller.net
     Value: !Join
-      - ','
+      - ' '
       - !GetAtt MetaphotoHostedZone.NameServers
     Export:
       Name: MetaphotoHostedZoneNameServers
