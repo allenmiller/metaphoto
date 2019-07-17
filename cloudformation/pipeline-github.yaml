@@ -304,6 +304,11 @@ Resources:
         Statement:
           Effect: Allow
           Action:
+            - iam:GetRole
+            - apigateway:GET
+            - apigateway:POST
+            - apigateway:PUT
+            - apigateway:DELETE
             - lambda:Get*
             - lambda:List*
             - lambda:CreateFunction
@@ -328,14 +333,9 @@ Resources:
           Effect: Allow
           Action:
             - codebuild:*
-            - apigateway:GET
-            - apigateway:POST
-            - apigateway:PUT
-            - apigateway:DELETE
             - s3:DeleteBucket
             - s3:ListBucketVersions
             - iam:PassRole
-            - iam:GetRole
             - iam:CreateRole
             - iam:PutRolePolicy
             - iam:DeleteRolePolicy

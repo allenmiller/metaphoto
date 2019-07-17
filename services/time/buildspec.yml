@@ -8,5 +8,4 @@ phases:
   build:
     commands:
       - cd services/time
-      - export SLS_DEBUG=1
-      - serverless deploy -v
+      - serverless deploy
