@@ -306,6 +306,7 @@ Resources:
           Action:
             - IAM:CreateRole
             - IAM:GetRole
+            - IAM:PutRolePolicy
             - apigateway:GET
             - apigateway:POST
             - apigateway:PUT
@@ -337,8 +338,6 @@ Resources:
             - s3:DeleteBucket
             - s3:ListBucketVersions
             - iam:PassRole
-            - iam:CreateRole
-            - iam:PutRolePolicy
             - iam:DeleteRolePolicy
             - iam:DeleteRole
             - cloudwatch:GetMetricStatistics
