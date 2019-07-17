@@ -123,7 +123,7 @@ Resources:
         - Name: DeployTimeLambda
           Actions:
             - Name: DeployTimeLambda
-              RunOrder: 2
+              RunOrder: 1
               ActionTypeId:
                 Category: Build
                 Owner: AWS
