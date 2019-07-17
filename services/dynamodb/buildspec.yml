@@ -8,4 +8,4 @@ phases:
   build:
     commands:
       - cd services/dynamodb
-      - serverless deploy --force
+      - serverless deploy

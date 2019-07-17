@@ -244,8 +244,9 @@ Resources:
         Statement:
           Effect: Allow
           Action:
-            - s3:CreateBucket
-            - s3:PutEncryptionConfiguration
+            - S3:CreateBucket
+            - S3:PutEncryptionConfiguration
+            - S3:GetBucketLocation
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
