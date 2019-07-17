@@ -325,6 +325,7 @@ Resources:
             - lambda:InvokeFunction
             - lambda:PublishVersion
             - lambda:RemovePermission
+            - lambda:UpdateFunctionCode
           Resource: "*"
       Roles:
         - !Ref LambdaCodeBuildRole
