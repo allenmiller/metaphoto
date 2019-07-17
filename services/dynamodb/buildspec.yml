@@ -4,11 +4,8 @@ phases:
     runtime-versions:
       nodejs: 10
     commands:
-      - env
       - npm install -g serverless
   build:
     commands:
       - cd services/dynamodb
-      - ls -al
-      - export SLS_DEBUG=true
-      - serverless deploy -v
+      - serverless deploy
