@@ -61,6 +61,23 @@ Resources:
       Artifacts:
         Type: CODEPIPELINE
 
+  TimeLambdaCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: TimeLambdaCodeBuildProject
+      Description: Set up the time lambda
+      ServiceRole: !Ref LambdaCodeBuildRole
+      TimeoutInMinutes: 5
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: services/time/buildspec.yml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:10.1.0
+      Artifacts:
+        Type: CODEPIPELINE
+
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -102,6 +119,20 @@ Resources:
                 - Name: SourceCode
               Configuration:
                 ProjectName: !Ref DynamoDbCodeBuildProject
+
+        - Name: DeployTimeLambda
+          Actions:
+            - Name: DeployTimeLambda
+              RunOrder: 2
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              InputArtifacts:
+                - Name: SourceCode
+              Configuration:
+                ProjectName: !Ref TimeLambdaCodeBuildProject
 
   GithubWebhook:
     Type: 'AWS::CodePipeline::Webhook'
@@ -154,6 +185,18 @@ Resources:
             Service: "codebuild.amazonaws.com"
           Action: "sts:AssumeRole"
 
+  LambdaCodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", ["LambdaCodeBuildRole", !Ref "AWS::StackName"] ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: "codebuild.amazonaws.com"
+          Action: "sts:AssumeRole"
+
   DynamoDBCodeBuildPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -190,6 +233,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
+        - !Ref LambdaCodeBuildRole
 
   CodebuildCloudformationPolicy:
     Type: AWS::IAM::Policy
@@ -248,6 +292,29 @@ Resources:
       Roles:
         - !Ref DynamoDbCodeBuildRole
 
+  LambdaCodeBuildPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "", ["LambdaCodeBuildPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - lambda:Get*
+            - lambda:List*
+            - lambda:CreateFunction
+            - lambda:AddPermission
+            - lambda:CreateAlias
+            - lambda:DeleteFunction
+            - lambda:InvokeFunction
+            - lambda:PublishVersion
+            - lambda:RemovePermission
+          Resource: "*"
+      Roles:
+        - !Ref LambdaCodeBuildRole
+
   CodeBuildPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
@@ -259,16 +326,6 @@ Resources:
           Effect: Allow
           Action:
             - codebuild:*
-            - lambda:Get*
-            - lambda:List*
-            - lambda:CreateFunction
-            - lambda:AddPermission
-            - lambda:CreateAlias
-            - lambda:DeleteFunction
-            - lambda:InvokeFunction
-            - lambda:PublishVersion
-            - lambda:RemovePermission
-            - lambda:Update*
             - apigateway:GET
             - apigateway:POST
             - apigateway:PUT

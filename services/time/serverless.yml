@@ -1,0 +1,35 @@
+service: metaphoto-time
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: dev
+  region: us-west-1
+  deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
+
+functions:
+  get:
+    handler: time.handler
+    events:
+      http:
+        path: time
+        method: get
+        cors: true
+
+resources:
+  Outputs:
+    RestApiId:
+      Value:
+        Ref: RestApiId
+      Export:
+        Name: RestApiId
+
+    RestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - RestApiId
+          - RootResourceId
+      Export: RootResourceId

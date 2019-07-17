@@ -1,4 +1,4 @@
-var time = require('services/backend/time');
+var time = require('services/time/time');
 exports.handler = (event, context, callback) => {
     var currentTime = new time.Date();
     currentTime.setTimezone("America/Los_Angeles");
