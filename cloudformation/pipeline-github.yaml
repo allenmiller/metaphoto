@@ -44,6 +44,13 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+  MetaphotoHostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: Hosted zone for metaphoto.ajmiller.net
+      Name: metaphoto.ajmiller.net
+
   DynamoDbCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -375,3 +382,11 @@ Outputs:
     Value: !Ref MetaphotoPipelineArtifactsBucket
     Export:
       Name: MetaphotoPipelineArtifactsBucket
+
+  MetaphotoHostedZoneNameServers:
+    Description: Hosted zone for metaphoto.ajmiller.net
+    Value: !Join
+      - ','
+      - !GetAtt MetaphotoHostedZone.NameServers
+    Export:
+      Name: MetaphotoHostedZoneNameServers
