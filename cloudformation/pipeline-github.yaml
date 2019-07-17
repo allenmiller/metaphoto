@@ -106,7 +106,7 @@ Resources:
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
 
-        - Name: DeployDatabase
+        - Name: BuildComponents
           Actions:
             - Name: BuildDynamoDatabase
               RunOrder: 1
@@ -120,8 +120,6 @@ Resources:
               Configuration:
                 ProjectName: !Ref DynamoDbCodeBuildProject
 
-        - Name: DeployTimeLambda
-          Actions:
             - Name: DeployTimeLambda
               RunOrder: 1
               ActionTypeId:
