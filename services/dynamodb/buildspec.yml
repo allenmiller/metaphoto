@@ -10,4 +10,5 @@ phases:
     commands:
       - cd services/dynamodb
       - ls -al
+      - export SLS_DEBUG=true
       - serverless deploy -v
