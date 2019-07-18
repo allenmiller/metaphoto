@@ -17,6 +17,15 @@ custom:
   # Important: The Route53 A and AAAA domain records created by serverless-domain-manager are managed by the API,
   # not Cloudformation.  They do not appear as Resources in the Cloudformation stack for this service.  Do not manage
   # them manually via Route53.
+  #
+  # When deleting this stack, do 'sls delete_domain', then 'sls remove'.  Failure to do this may result in lost, hidden
+  # custom domains which will cause certificates to be un-removable.  See:
+  # https://forum.serverless.com/t/solved-cannot-delete-certificate-cloudfront-distribution-not-showing/3792/4
+  #
+  # TL;DR: if this happens, create a temporary API gateway so you can see the Custom Domain Names and delete it manually.
+  #
+  # TODO: create a pipeline action to automate this cleanup
+
   customDomain:
     domainName: api.${self:provider.domain}
     stage: ${self:provider.stage}
