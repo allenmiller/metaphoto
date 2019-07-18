@@ -10,4 +10,5 @@ phases:
     commands:
       - cd services/time
       - export SLS_DEBUG=1
+      - serverless create_domain
       - serverless deploy
