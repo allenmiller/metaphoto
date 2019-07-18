@@ -1,7 +1,15 @@
 service: metaphoto-time
 
+plugins:
+  - serverless-domain-manager
+
 custom:
   stage: ${opt:stage, self:provider.stage}
+  customDomain:
+    domainName: metaphoto.ajmiller.net
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 provider:
   name: aws
