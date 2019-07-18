@@ -6,7 +6,7 @@ provider:
   stage: dev
   region: us-west-1
   deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
-  domain: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
+  domain: ${cf:metaphoto-us-west-1-dev.MetaphotoHostedZone}
 
 plugins:
   - serverless-domain-manager
