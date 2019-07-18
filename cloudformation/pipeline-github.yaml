@@ -395,6 +395,12 @@ Resources:
         - !Ref CodePipelineRole
 
 Outputs:
+  MetaphotoHostedZone:
+    Description: Domain name for application
+    Value: !Ref HostedZoneDnsName
+    Export:
+      Name: MetaphotoHostedZone
+
   MetaphotoPipelineArtifactsBucket:
     Description: Bucket to hold build artifacts
     Value: !Ref MetaphotoPipelineArtifactsBucket

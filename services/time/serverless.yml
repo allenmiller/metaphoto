@@ -13,10 +13,10 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: metaphoto.ajmiller.net
+    domainName: ${cf.metaphoto-us-west-1-dev.MetaphotoHozedZone}
     stage: ${self:provider.stage}
     basePath: ${self:provider.stage}
-    certificateName: metaphoto.ajmiller.net
+    certificateName: ${cf.metaphoto-us-west-1-dev.MetaphotoHozedZone}
     endpointType: REGIONAL
     createRoute53Record: true
 
