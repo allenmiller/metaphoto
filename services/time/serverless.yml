@@ -13,8 +13,12 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+
+  # Important: The Route53 A and AAAA domain records created by serverless-domain-manager are managed by the API,
+  # not Cloudformation.  They do not appear as Resources in the Cloudformation stack for this service.  Do not manage
+  # them manually via Route53.
   customDomain:
-    domainName: ${self:provider.domain}
+    domainName: api.${self:provider.domain}
     stage: ${self:provider.stage}
     basePath: ${self:provider.stage}
     certificateName: ${self:provider.domain}
