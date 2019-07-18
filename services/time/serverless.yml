@@ -16,7 +16,7 @@ custom:
     domainName: metaphoto.ajmiller.net
     stage: ${self:provider.stage}
     basePath: ${self:provider.stage}
-#    certificateName: metaphoto.ajmiller.net
+#     certificateName: metaphoto.ajmiller.net
     certificateArn: arn:aws:acm:us-west-1:235694731559:certificate/bb6e9f07-8815-4bc9-83c2-c77d8e580161
     endPointType: regional
     createRoute53Record: true
