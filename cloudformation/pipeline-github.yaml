@@ -319,7 +319,9 @@ Resources:
         Statement:
           Effect: Allow
           Action:
+            - ACM:ListCertificates
             - IAM:CreateRole
+            - IAM:CreateServiceLinkedRole
             - IAM:GetRole
             - IAM:GetRolePolicy
             - IAM:PutRolePolicy
@@ -331,6 +333,8 @@ Resources:
             - apigateway:PUT
             - apigateway:DELETE
             - apigateway:PATCH
+            - Cloudformation:GET
+            - Cloudfront:UpdateDistribution
             - lambda:Get*
             - lambda:List*
             - lambda:CreateFunction
@@ -341,6 +345,10 @@ Resources:
             - lambda:PublishVersion
             - lambda:RemovePermission
             - lambda:UpdateFunctionCode
+            - Route53:ListHostedZones
+            - Route53:ChangeResourceRecordSets
+            - Route53:GetHostedZone
+            - Route53:ListResourceRecordSets
           Resource: "*"
       Roles:
         - !Ref LambdaCodeBuildRole

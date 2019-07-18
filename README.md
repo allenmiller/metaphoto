@@ -8,3 +8,5 @@ Manual actions needed:
     - This would not be necessary if the root domain were hosted in Route53
 
 - Create the CNAME record necessary to validate the Certificate
+
+https://www.npmjs.com/package/serverless-domain-manager

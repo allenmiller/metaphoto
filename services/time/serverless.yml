@@ -7,9 +7,12 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   customDomain:
     domainName: metaphoto.ajmiller.net
-    basePath: ''
     stage: ${self:provider.stage}
+    basePath: ${self:provider.stage}
+    certificateName: metaphoto.ajmiller.net
+    endPointType: regional
     createRoute53Record: true
+
 
 provider:
   name: aws
