@@ -4,10 +4,10 @@ provider:
   name: aws
   runtime: nodejs10.x
   stage: dev
-  region: us-west-1
-  deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
-  domain: ${cf:metaphoto-us-west-1-dev.MetaphotoHostedZone}
-  certificateArn: ${cf:metaphoto-us-west-1-dev.MetaphotoCertificateArn}
+  region: us-west-2
+  deploymentBucket: ${cf:metaphoto-us-west-2-dev.MetaphotoPipelineArtifactsBucket}
+  domain: ${cf:metaphoto-us-west-2-dev.MetaphotoHostedZone}
+  certificateArn: ${cf:metaphoto-us-west-2-dev.MetaphotoCertificateArn}
 
 plugins:
   - serverless-domain-manager
