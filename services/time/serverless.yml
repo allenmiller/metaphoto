@@ -1,5 +1,12 @@
 service: metaphoto-time
 
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: dev
+  region: us-west-1
+  deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
+
 plugins:
   - serverless-domain-manager
 
@@ -13,14 +20,6 @@ custom:
     certificateArn: arn:aws:acm:us-west-1:235694731559:certificate/bb6e9f07-8815-4bc9-83c2-c77d8e580161
     endPointType: regional
     createRoute53Record: true
-
-
-provider:
-  name: aws
-  runtime: nodejs10.x
-  stage: dev
-  region: us-west-1
-  deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
 
 functions:
   get:
