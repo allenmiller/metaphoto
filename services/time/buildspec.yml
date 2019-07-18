@@ -9,6 +9,6 @@ phases:
   build:
     commands:
       - cd services/time
-      - serverless delete_domain
+#      - serverless delete_domain
       - serverless create_domain
       - serverless deploy
