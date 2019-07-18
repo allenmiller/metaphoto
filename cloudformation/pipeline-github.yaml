@@ -55,6 +55,12 @@ Resources:
         Comment: Hosted zone for metaphoto.ajmiller.net
       Name: !Ref HostedZoneDnsName
 
+  TlsCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref HostedZoneDnsName
+      ValidationMethod: DNS
+
   DynamoDbCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
