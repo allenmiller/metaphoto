@@ -5,7 +5,7 @@ phases:
       nodejs: 10
     commands:
       - npm install -g serverless
-      - npm install -g serverless-domain-manager
+      - npm install serverless-domain-manager
   build:
     commands:
       - cd services/time
