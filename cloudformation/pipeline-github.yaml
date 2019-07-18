@@ -58,8 +58,11 @@ Resources:
   TlsCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: !Ref HostedZoneDnsName
+      DomainName: !Join [".", ["*", !Ref HostedZoneDnsName]]
       ValidationMethod: DNS
+      SubjectAlternativeNames:
+        - !Join [".", ["*", !Ref HostedZoneDnsName]]
+        - !Ref HostedZoneDnsName
 
   DynamoDbCodeBuildProject:
     Type: AWS::CodeBuild::Project
