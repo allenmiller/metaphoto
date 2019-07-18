@@ -13,10 +13,10 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: ${cf.metaphoto-us-west-1-dev.MetaphotoHozedZone}
+    domainName: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
     stage: ${self:provider.stage}
     basePath: ${self:provider.stage}
-    certificateName: ${cf.metaphoto-us-west-1-dev.MetaphotoHozedZone}
+    certificateName: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
     endpointType: REGIONAL
     createRoute53Record: true
 
