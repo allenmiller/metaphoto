@@ -6,6 +6,7 @@ provider:
   stage: dev
   region: us-west-1
   deploymentBucket: ${cf:metaphoto-us-west-1-dev.MetaphotoPipelineArtifactsBucket}
+  domain: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
 
 plugins:
   - serverless-domain-manager
@@ -13,10 +14,10 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
+    domainName: ${self:provider.domain}
     stage: ${self:provider.stage}
     basePath: ${self:provider.stage}
-    certificateName: ${cf.metaphoto-us-west-1-dev.MetaphotoHostedZone}
+    certificateName: ${self:provider.domain}
     endpointType: REGIONAL
     createRoute53Record: true
 
