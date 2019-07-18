@@ -48,6 +48,24 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+  MediaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ["-", [metaphoto, !Ref Environment]]
+      AttributeDefinitions:
+        - AttributeName: mediaId
+          AttributeType: S
+        - AttributeName: mediaType
+          AttributeType: S
+      KeySchema:
+        - AttributeName: mediaId
+          KeyType: HASH
+        - AttributeName: mediaType
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   MetaphotoHostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
@@ -63,23 +81,6 @@ Resources:
       SubjectAlternativeNames:
         - !Join [".", ["*", !Ref HostedZoneDnsName]]
         - !Ref HostedZoneDnsName
-
-  DynamoDbCodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: DynamoDbCodeBuildProject
-      Description: Build the DynamoDB database.
-      ServiceRole: !Ref DynamoDbCodeBuildRole
-      TimeoutInMinutes: 5
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: resources/dynamodb/buildspec.yml
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/nodejs:10.1.0
-      Artifacts:
-        Type: CODEPIPELINE
 
   TimeLambdaCodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -126,20 +127,8 @@ Resources:
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
 
-        - Name: BuildComponents
+        - Name: BuildServerlessComponents
           Actions:
-            - Name: BuildDynamoDatabase
-              RunOrder: 1
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              InputArtifacts:
-                - Name: SourceCode
-              Configuration:
-                ProjectName: !Ref DynamoDbCodeBuildProject
-
             - Name: DeployTimeLambda
               RunOrder: 1
               ActionTypeId:
@@ -170,7 +159,7 @@ Resources:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName:
-        'Fn::Join': [ "", ["CodeBuildRole", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["CodeBuildRole", !Ref 'AWS::StackName', !Ref 'Environment']]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -235,7 +224,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName:
-        'Fn::Join': [ "", ["LoggingPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["LoggingPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -257,7 +246,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName:
-        'Fn::Join': [ "", ["CodebuildCloudformationPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["CodebuildCloudformationPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -281,7 +270,7 @@ Resources:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName:
-        'Fn::Join': [ "", ["S3PutGetPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["S3PutGetPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -296,27 +285,11 @@ Resources:
         - !Ref DynamoDbCodeBuildRole
         - !Ref LambdaCodeBuildRole
 
-# S3CreatePolicy:
-#    Type: "AWS::IAM::Policy"
-#    Properties:
-#      PolicyName:
-#        'Fn::Join': [ "", ["S3CreatePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-#      PolicyDocument:
-#        Version: "2012-10-17"
-#        Statement:
-#          Effect: Allow
-#          Action:
-#            - S3:CreateBucket
-#            - S3:PutEncryptionConfiguration
-#          Resource: "*"
-#      Roles:
-#        - !Ref DynamoDbCodeBuildRole
-
   LambdaCodeBuildPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName:
-        'Fn::Join': [ "", ["LambdaCodeBuildPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["LambdaCodeBuildPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -381,7 +354,7 @@ Resources:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName:
-        'Fn::Join': [ "", ["CodePipelinePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
+        'Fn::Join': [ "-", ["CodePipelinePolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -423,3 +396,8 @@ Outputs:
     Value: !Ref TlsCertificate
     Export:
       Name: TlsCertificateArn
+
+  MediaTableArn:
+    Value: !GetAtt MediaTable.Arn
+    Export:
+      Name: MediaTableArn
