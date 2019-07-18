@@ -417,3 +417,9 @@ Outputs:
       - !GetAtt MetaphotoHostedZone.NameServers
     Export:
       Name: MetaphotoHostedZoneNameServers
+
+  MetaphotoCertificateArn:
+    Description: ARN for the certificate
+    Value: !Ref TlsCertificate
+    Export:
+      Name: TlsCertificateArn
