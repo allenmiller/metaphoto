@@ -48,6 +48,12 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+  MetaphotoDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
   MediaTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -65,25 +71,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-
-  CognitoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      UserPoolName: !Join ["-", [user-pool, !Ref Environment]]
-      UsernameAttributes:
-        - email
-      AutoVerifiedAttributes:
-        - email
-
-  CognitoUserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      ClientName: !Join ["-", [user-pool-client, !Ref Environment]]
-      UserPoolId:
-        Ref: CognitoUserPool
-      ExplicitAuthFlows:
-        - ADMIN_NO_SRP_AUTH
-      GenerateSecret: false
 
   MetaphotoHostedZone:
     Type: AWS::Route53::HostedZone
@@ -390,14 +377,6 @@ Resources:
         - !Ref CodePipelineRole
 
 Outputs:
-  UserPoolId:
-    Value:
-      Ref: CognitoUserPool
-
-  UserPoolClientId:
-    Value:
-      Ref: CognitoUserPoolClient
-
   MetaphotoHostedZone:
     Description: Domain name for application
     Value: !Ref HostedZoneDnsName
@@ -409,6 +388,12 @@ Outputs:
     Value: !Ref MetaphotoPipelineArtifactsBucket
     Export:
       Name: MetaphotoPipelineArtifactsBucket
+
+  MetaphotoDataBucket:
+    Description: Holds application data such as photos, film specs, etc.
+    Value: !Ref MetaphotoDataBucket
+    Export:
+      Name: MetaphotoDataBucket
 
   MetaphotoHostedZoneNameServers:
     Description: Hosted zone for metaphoto.ajmiller.net
