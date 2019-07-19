@@ -1,6 +1,7 @@
 # Misc
 *.zip
 .idea/
+.serverless/
 
 # Logs
 logs
