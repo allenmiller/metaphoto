@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "./Login.css";
+import { Auth } from "aws-amplify";
 
 export default class Login extends Component {
     constructor(props) {
@@ -20,11 +21,19 @@ export default class Login extends Component {
         this.setState({
             [event.target.id]: event.target.value
         });
-    }
+    };
 
-    handleSubmit = event => {
+    handleSubmit = async event => {
         event.preventDefault();
-    }
+
+        try {
+            await Auth.signIn(this.state.email, this.state.password)
+            this.props.userHasAuthenticated(true);
+        } catch (e) {
+            alert(e.message);
+        }
+    };
+
 
     render() {
         return (
