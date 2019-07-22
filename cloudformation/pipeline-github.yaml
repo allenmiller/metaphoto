@@ -313,6 +313,7 @@ Resources:
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref LambdaCodeBuildRole
+        - !Ref WebAppCodeBuildRole
 
   CodebuildCloudformationPolicy:
     Type: AWS::IAM::Policy
