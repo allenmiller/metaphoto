@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Cloudformation template to create TLS Certificate in us-east-1 needed for cloudfront in other regions
+
+Parameters:
+  DomainName:
+    Description: Domain name for certificate, i.e. "*.metaphoto.ajmiller.net"
+    Type: String
+  SubjectAlternativeNames:
+    Description: A comma-separated list of SANs, i.e. "metaphoto.ajmiller.net,*.metaphoto.ajmiller.net"
+    Type: String
+
+Resources:
+  TlsCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      SubjectAlternativeNames: !Split [",", !Ref SubjectAlternativeNames]
+
+Outputs:
+  MetaphotoCertificateArn:
+    Description: ARN for the certificate
+    Value: !Ref TlsCertificate
+    Export:
+      Name: TlsCertificateArn
