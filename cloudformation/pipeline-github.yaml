@@ -41,6 +41,10 @@ Parameters:
     Type: String
     Default: metaphoto.ajmiller.net
 
+  UsEast1CertificateArn:
+    Type: String
+    Description: ARN of certificate in us-east-1 for use by Cloudfront
+
 Resources:
   MetaphotoPipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -92,6 +96,13 @@ Resources:
     Type: "AWS::CloudFront::Distribution"
     Properties:
       DistributionConfig:
+        PriceClass: PriceClass_100
+        Aliases:
+          - metaphoto.ajmiller.net
+        ViewerCertificate:
+          AcmCertificateArn: !Ref UsEast1CertificateArn
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
         Origins:
           -
             # Use the DeployBucket as the CDN origin
