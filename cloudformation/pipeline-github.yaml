@@ -83,6 +83,17 @@ Resources:
         Comment: Hosted zone for metaphoto
       Name: !Ref HostedZoneDnsName
 
+  MetaphotoRoute53RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: Record set for metaphoto.
+      HostedZoneId: !Ref MetaphotoHostedZone
+      Name: !Ref HostedZoneDnsName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt MetaphotoDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2  # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget-1.html
+
   TlsCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
