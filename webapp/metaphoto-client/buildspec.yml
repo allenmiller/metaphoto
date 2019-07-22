@@ -33,7 +33,4 @@ phases:
         aws cloudfront create-invalidation --distribution-id ${Distribution}
         --paths /index.html /service-worker.js
       - ls -al
-artifacts:
-  files:
-    - '**/*'
-  base-directory: build
+      - find build
