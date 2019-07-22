@@ -434,7 +434,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName:
-        'Fn::Join': [ "-", ["LambdaCodeBuildPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
+        'Fn::Join': [ "-", ["CloudfrontBuildPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
