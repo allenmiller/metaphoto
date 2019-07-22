@@ -358,6 +358,7 @@ Resources:
             - S3:GetBucketLocation
             - S3:GetObject
             - S3:PutObject
+            - S3:PutObjectAcl
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
@@ -389,7 +390,6 @@ Resources:
             - apigateway:DELETE
             - apigateway:PATCH
             - Cloudformation:GET
-            - Cloudfront:UpdateDistribution
             - lambda:Get*
             - lambda:List*
             - lambda:CreateFunction
@@ -407,6 +407,23 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref LambdaCodeBuildRole
+
+  CloudFrontDistributionPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        'Fn::Join': [ "-", ["LambdaCodeBuildPolicy", !Ref 'AWS::StackName', !Ref 'Environment']]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Action:
+            - Cloudfront:UpdateDistribution
+            - Cloudfront:CreateInvalidation
+          Resource: "*"
+      Roles:
+        - !Ref LambdaCodeBuildRole
+        - !Ref WebAppCodeBuildRole
 
   CodeBuildPolicy:
     Type: "AWS::IAM::Policy"
