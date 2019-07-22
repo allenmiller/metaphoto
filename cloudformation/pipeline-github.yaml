@@ -88,7 +88,7 @@ Resources:
         - !Join [".", ["*", !Ref HostedZoneDnsName]]
         - !Ref HostedZoneDnsName
 
-  Distribution:
+  MetaphotoDistribution:
     Type: "AWS::CloudFront::Distribution"
     Properties:
       DistributionConfig:
@@ -141,6 +141,11 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: aws/codebuild/nodejs:10.1.0
+        EnvironmentVariables:
+          - Name: DeployBucket
+            Value: !Ref MetaphotoPipelineArtifactsBucket
+          - Name: Distribution
+            Value: !Ref MetaphotoDistribution
       Source:
         Type: CODEPIPELINE
         BuildSpec: webapp/metaphoto-client/buildspec.yml
