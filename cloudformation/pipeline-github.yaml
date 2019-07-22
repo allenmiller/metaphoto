@@ -88,6 +88,28 @@ Resources:
         - !Join [".", ["*", !Ref HostedZoneDnsName]]
         - !Ref HostedZoneDnsName
 
+  Distribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Origins:
+          -
+            # Use the DeployBucket as the CDN origin
+            DomainName: !GetAtt MetaphotoPipelineArtifactsBucket.DomainName
+            Id: !Ref MetaphotoPipelineArtifactsBucket
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultRootObject: index.html
+        Enabled: true
+        # Configure the caching behavior for our CDN
+        DefaultCacheBehavior:
+          MinTTL: 86400  # 1 day
+          MaxTTL: 31536000  # 1 year
+          ForwardedValues:
+            QueryString: true
+          TargetOriginId: !Ref MetaphotoPipelineArtifactsBucket
+          ViewerProtocolPolicy: "redirect-to-https"   # we want to force HTTPS
+
   TimeLambdaCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -104,6 +126,24 @@ Resources:
         Image: aws/codebuild/nodejs:10.1.0
       Artifacts:
         Type: CODEPIPELINE
+
+  WebAppCodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: WebAppCodeBuildProject
+      ServiceRole: !Ref WebAppCodeBuildRole
+      Artifacts:
+        # The downloaded source code for the build will come from CodePipeline
+        Type: CODEPIPELINE
+        Name: MyProject
+      Environment:
+        # Linux container with node installed
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/nodejs:10.1.0
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: webapp/metaphoto-client/buildspec.yml
 
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -133,9 +173,9 @@ Resources:
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
 
-        - Name: BuildServerlessComponents
+        - Name: BuildAndDeploy
           Actions:
-            - Name: DeployTimeLambda
+            - Name: TimeLambda
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -146,6 +186,20 @@ Resources:
                 - Name: SourceCode
               Configuration:
                 ProjectName: !Ref TimeLambdaCodeBuildProject
+
+            - Name: WebApp
+              RunOrder: 1
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: SourceCode
+              OutputArtifacts:
+                - Name: DeployedWebApp
+              Configuration:
+                ProjectName: !Ref WebAppCodeBuildProject
 
   GithubWebhook:
     Type: 'AWS::CodePipeline::Webhook'
@@ -202,6 +256,18 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Join [ "-", ["LambdaCodeBuildRole", !Ref "AWS::StackName"] ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: "codebuild.amazonaws.com"
+          Action: "sts:AssumeRole"
+
+  WebAppCodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", ["WebAppCodeBuildRole", !Ref "AWS::StackName"] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -290,6 +356,7 @@ Resources:
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref LambdaCodeBuildRole
+        - !Ref WebAppCodeBuildRole
 
   LambdaCodeBuildPolicy:
     Type: "AWS::IAM::Policy"
