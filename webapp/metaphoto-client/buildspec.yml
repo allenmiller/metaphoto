@@ -4,7 +4,7 @@ phases:
     commands:
       - pwd
       - ls -al
-      - cd src/webapp/metaphoto-client
+      - cd webapp/metaphoto-client
       - echo Installing source NPM dependencies...
       - npm install
   build:
