@@ -10,5 +10,5 @@ phases:
   build:
     commands:
       - export SLS_DEBUG=1
-      - serverless delete_domain
-      - serverless remove
+      - serverless create_domain
+      - serverless deploy

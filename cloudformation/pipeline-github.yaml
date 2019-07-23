@@ -412,6 +412,10 @@ Resources:
             - apigateway:DELETE
             - apigateway:PATCH
             - Cloudformation:GET
+            - Cognito-Identity:SetIdentityPoolRoles
+            - Cognito-Identity:DeleteIdentityPool
+            - Cognito-Idp:DeleteUserPoolClient
+            - Cognito-Idp:DeleteUserPool
             - lambda:Get*
             - lambda:List*
             - lambda:CreateFunction
