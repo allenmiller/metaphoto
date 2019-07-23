@@ -414,6 +414,9 @@ Resources:
             - Cloudformation:GET
             - Cognito-Identity:SetIdentityPoolRoles
             - Cognito-Identity:DeleteIdentityPool
+            - Cognito-Identity:CreateIdentityPool
+            - Cognito-Idp:CreateUserPoolClient
+            - Cognito-Idp:CreateUserPool
             - Cognito-Idp:DeleteUserPoolClient
             - Cognito-Idp:DeleteUserPool
             - lambda:Get*
