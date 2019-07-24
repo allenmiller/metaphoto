@@ -79,7 +79,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Join ["-", [user-pool, !Ref Environment]]
+      UserPoolName: !Join ["-", [metaphoto-user-pool, !Ref Environment]]
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
@@ -88,12 +88,21 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Join ["-", [user-pool-client, !Ref Environment]]
+      ClientName: !Join ["-", [metaphoto-user-pool-client, !Ref Environment]]
       UserPoolId:
         Ref: CognitoUserPool
       ExplicitAuthFlows:
         - ADMIN_NO_SRP_AUTH
       GenerateSecret: false
+
+  CognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Join ["_", [MetaphotoIdentityPool, !Ref Environment]]
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref CognitoUserPoolClient
+          ProviderName: !GetAtt CognitoUserPool.ProviderName
 
   MetaphotoHostedZone:
     Type: AWS::Route53::HostedZone
@@ -506,7 +515,66 @@ Resources:
             - "*"
       Roles:
         - !Ref CodePipelineRole
+  # IAM roles
+  CognitoIdentityPoolRoles:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId:
+        Ref: CognitoIdentityPool
+      Roles:
+        authenticated:
+          Fn::GetAtt: [CognitoAuthRole, Arn]
 
+  # IAM role used for authenticated users
+  CognitoAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Federated: 'cognito-identity.amazonaws.com'
+            Action:
+              - 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals:
+                'cognito-identity.amazonaws.com:aud':
+                  Ref: CognitoIdentityPool
+              'ForAnyValue:StringLike':
+                'cognito-identity.amazonaws.com:amr': authenticated
+      Policies:
+        - PolicyName: 'CognitoAuthorizedPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'mobileanalytics:PutEvents'
+                  - 'cognito-sync:*'
+                  - 'cognito-identity:*'
+                Resource: '*'
+
+              # Allow users to invoke our API
+              - Effect: 'Allow'
+                Action:
+                  - 'execute-api:Invoke'
+                Resource: '*'
+
+              # Allow users to upload attachments to their
+              # folder inside our S3 bucket
+              - Effect: 'Allow'
+                Action:
+                  - 's3:*'
+                Resource:
+                  - Fn::Join:
+                      - ''
+                      -
+                        - Fn::GetAtt: [MetaphotoDataBucket, Arn]
+                        - '/private/'
+                        - '$'
+                        - '{cognito-identity.amazonaws.com:sub}/*'
 Outputs:
   UserPoolId:
     Value:
@@ -515,6 +583,9 @@ Outputs:
   UserPoolClientId:
     Value:
       Ref: CognitoUserPoolClient
+
+  IdentityPoolId:
+    Value: !Ref CognitoIdentityPool
 
   MetaphotoHostedZone:
     Description: Domain name for application
