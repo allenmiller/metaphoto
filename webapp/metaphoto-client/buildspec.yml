@@ -2,14 +2,13 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - pwd
-      - ls -al
       - cd webapp/metaphoto-client
       - echo Installing source NPM dependencies...
       - npm install
   build:
     commands:
       - echo Build started on `date`
+      - env
       - npm run build
   post_build:
     commands:
@@ -28,7 +27,6 @@ phases:
         ./build/index.html s3://${DeployBucket}/
       # invalidate the CloudFront cache for index.html and service-worker.js
       # to force CloudFront to update its edge locations with the new versions
-      - env
       - >
         aws cloudfront create-invalidation --distribution-id ${Distribution}
         --paths /index.html /service-worker.js

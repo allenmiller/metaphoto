@@ -196,6 +196,13 @@ Resources:
             Value: !Ref MetaphotoPipelineArtifactsBucket
           - Name: Distribution
             Value: !Ref MetaphotoDistribution
+          - Name: UserPoolId
+            Value: !Ref CognitoUserPool
+          - Name: UserPoolClientId
+            Value: !Ref CognitoUserPoolClient
+          - Name: IdentityPoolId
+            Value: !Ref CognitoIdentityPool
+
       Source:
         Type: CODEPIPELINE
         BuildSpec: webapp/metaphoto-client/buildspec.yml
@@ -577,12 +584,10 @@ Resources:
                         - '{cognito-identity.amazonaws.com:sub}/*'
 Outputs:
   UserPoolId:
-    Value:
-      Ref: CognitoUserPool
+    Value: !Ref CognitoUserPool
 
   UserPoolClientId:
-    Value:
-      Ref: CognitoUserPoolClient
+    Value: !Ref CognitoUserPoolClient
 
   IdentityPoolId:
     Value: !Ref CognitoIdentityPool
