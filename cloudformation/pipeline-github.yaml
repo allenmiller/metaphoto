@@ -196,11 +196,11 @@ Resources:
             Value: !Ref MetaphotoPipelineArtifactsBucket
           - Name: Distribution
             Value: !Ref MetaphotoDistribution
-          - Name: UserPoolId
+          - Name: REACT_ENV_USER_POOL_ID
             Value: !Ref CognitoUserPool
-          - Name: UserPoolClientId
+          - Name: REACT_ENV_USER_POOL_CLIENT_ID
             Value: !Ref CognitoUserPoolClient
-          - Name: IdentityPoolId
+          - Name: REACT_ENV_IDENTITY_POOL_ID
             Value: !Ref CognitoIdentityPool
 
       Source:
