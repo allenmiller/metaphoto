@@ -183,11 +183,9 @@ Resources:
       Name: WebAppCodeBuildProject
       ServiceRole: !Ref WebAppCodeBuildRole
       Artifacts:
-        # The downloaded source code for the build will come from CodePipeline
         Type: CODEPIPELINE
         Name: MyProject
       Environment:
-        # Linux container with node installed
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
         Image: aws/codebuild/nodejs:10.1.0
