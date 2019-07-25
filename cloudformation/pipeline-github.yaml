@@ -22,9 +22,14 @@ Parameters:
     Default: allenmiller
     AllowedPattern: "[A-Za-z0-9-]+"
 
-  GitHubRepo:
+  GitHubApiRepo:
     Type: String
-    Default: metaphoto
+    Default: metaphoto-api
+    AllowedPattern: "[A-Za-z0-9-]+"
+
+  GitHubWebappRepo:
+    Type: String
+    Default: metaphoto-webapp
     AllowedPattern: "[A-Za-z0-9-]+"
 
   GitHubBranch:
@@ -160,16 +165,16 @@ Resources:
           TargetOriginId: !Ref MetaphotoPipelineArtifactsBucket
           ViewerProtocolPolicy: "redirect-to-https"   # we want to force HTTPS
 
-  TimeLambdaCodeBuildProject:
+  ApiCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: TimeLambdaCodeBuildProject
-      Description: Set up the time lambda
-      ServiceRole: !Ref LambdaCodeBuildRole
+      Name: ApiCodeBuildProject
+      Description: Set up the metaphoto API
+      ServiceRole: !Ref ApiCodeBuildRole
       TimeoutInMinutes: 5
       Source:
         Type: CODEPIPELINE
-        BuildSpec: services/time/buildspec.yml
+        BuildSpec: api/time/buildspec.yml
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
@@ -184,7 +189,7 @@ Resources:
       ServiceRole: !Ref WebAppCodeBuildRole
       Artifacts:
         Type: CODEPIPELINE
-        Name: MyProject
+        Name: WebAppArtifact
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Type: LINUX_CONTAINER
@@ -200,10 +205,9 @@ Resources:
             Value: !Ref CognitoUserPoolClient
           - Name: REACT_APP_IDENTITY_POOL_ID
             Value: !Ref CognitoIdentityPool
-
       Source:
         Type: CODEPIPELINE
-        BuildSpec: webapp/metaphoto-client/buildspec.yml
+        BuildSpec: metaphoto-webapp/buildspec.yml
 
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -224,10 +228,27 @@ Resources:
                 Version: 1
                 Provider: GitHub
               OutputArtifacts:
-                - Name: SourceCode
+                - Name: ApiSourceCode
               Configuration:
                 Owner: !Ref GitHubOwner
-                Repo: !Ref GitHubRepo
+                Repo: !Ref GitHubApiRepo
+                Branch: !Ref GitHubBranch
+                PollForSourceChanges: false
+                OAuthToken: !Ref GitHubOAuthToken
+              RunOrder: 1
+
+            - Name: WebappSource
+              InputArtifacts: []
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: WebappSourceCode
+              Configuration:
+                Owner: !Ref GitHubOwner
+                Repo: !Ref GitHubWebappRepo
                 Branch: !Ref GitHubBranch
                 PollForSourceChanges: false
                 OAuthToken: !Ref GitHubOAuthToken
@@ -235,7 +256,7 @@ Resources:
 
         - Name: BuildAndDeploy
           Actions:
-            - Name: TimeLambda
+            - Name: Api
               RunOrder: 1
               ActionTypeId:
                 Category: Build
@@ -243,9 +264,9 @@ Resources:
                 Provider: CodeBuild
                 Version: '1'
               InputArtifacts:
-                - Name: SourceCode
+                - Name: ApiSourceCode
               Configuration:
-                ProjectName: !Ref TimeLambdaCodeBuildProject
+                ProjectName: !Ref ApiCodeBuildProject
 
             - Name: WebApp
               RunOrder: 1
@@ -255,7 +276,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               InputArtifacts:
-                - Name: SourceCode
+                - Name: WebappSourceCode
               OutputArtifacts:
                 - Name: DeployedWebApp
               Configuration:
@@ -312,10 +333,10 @@ Resources:
             Service: "codebuild.amazonaws.com"
           Action: "sts:AssumeRole"
 
-  LambdaCodeBuildRole:
+  ApiCodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join [ "-", ["LambdaCodeBuildRole", !Ref "AWS::StackName"] ]
+      RoleName: !Join [ "-", ["ApiCodeBuildRole", !Ref "AWS::StackName"] ]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -372,7 +393,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
-        - !Ref LambdaCodeBuildRole
+        - !Ref ApiCodeBuildRole
         - !Ref WebAppCodeBuildRole
 
   CodebuildCloudformationPolicy:
@@ -397,7 +418,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
-        - !Ref LambdaCodeBuildRole
+        - !Ref ApiCodeBuildRole
 
   S3PutGetPolicy:
     Type: "AWS::IAM::Policy"
@@ -417,7 +438,7 @@ Resources:
           Resource: "*"
       Roles:
         - !Ref DynamoDbCodeBuildRole
-        - !Ref LambdaCodeBuildRole
+        - !Ref ApiCodeBuildRole
         - !Ref WebAppCodeBuildRole
 
   LambdaCodeBuildPolicy:
@@ -461,7 +482,7 @@ Resources:
             - Route53:ListResourceRecordSets
           Resource: "*"
       Roles:
-        - !Ref LambdaCodeBuildRole
+        - !Ref ApiCodeBuildRole
 
   CloudFrontDistributionPolicy:
     Type: AWS::IAM::Policy
@@ -477,7 +498,7 @@ Resources:
             - Cloudfront:CreateInvalidation
           Resource: "*"
       Roles:
-        - !Ref LambdaCodeBuildRole
+        - !Ref ApiCodeBuildRole
         - !Ref WebAppCodeBuildRole
 
   CodeBuildPolicy:
