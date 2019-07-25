@@ -10,6 +10,7 @@ export default class Home extends Component {
         this.state = {
             time: "Initial time"
         };
+        this.getTime();
     }
 
     getTime()  {
@@ -33,7 +34,6 @@ export default class Home extends Component {
     };
 
     render() {
-        this.getTime();
         return (
             <div className="Home">
                 <div className="lander">
