@@ -44,3 +44,4 @@ functions:
           path: time
           method: get
           cors: true
+          authorizer: aws_iam
