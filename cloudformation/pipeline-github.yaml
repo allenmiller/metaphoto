@@ -205,6 +205,12 @@ Resources:
             Value: !Ref CognitoUserPoolClient
           - Name: REACT_APP_IDENTITY_POOL_ID
             Value: !Ref CognitoIdentityPool
+          - Name: REACT_APP_REGION
+            Value: !Ref AWS::Region
+          - Name: REACT_APP_DATA_BUCKET
+            Value: !Ref MetaphotoDataBucket
+          - Name: REACT_APP_API_URL
+            Value: !ImportValue ServiceEndpoint  # Cross-stack dependency?
       Source:
         Type: CODEPIPELINE
         BuildSpec: metaphoto-webapp/buildspec.yml
@@ -676,3 +682,8 @@ Outputs:
     Value: !GetAtt MediaTable.Arn
     Export:
       Name: MediaTableArn
+
+  Region:
+    Value: !Ref AWS::Region
+    Export:
+      Name: MetaphotoRegion
