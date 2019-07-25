@@ -25,7 +25,7 @@ export default class Home extends Component {
         };
         Amplify.configure(apiConfig);
         let apiName = "timeApi";
-        let apiPath = "time";
+        let apiPath = "/time";
         let myInit = {};
         API.get(apiName, apiPath, myInit).then(response => {
             this.setState({time: response.data});
