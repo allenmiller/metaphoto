@@ -13,7 +13,7 @@ export default class Home extends Component {
     }
 
     getTime()  {
-        export const apiConfig = {
+         const apiConfig = {
             API: {
                 endpoints: [
                     {
