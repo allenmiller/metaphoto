@@ -5,6 +5,13 @@ import { API } from "aws-amplify";
 
 export default class Home extends Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            time: ""
+        };
+    }
+
     getTime = async () => {
         let apiName = "";   // TODO: define actual API
         let apiPath = "time";
@@ -14,7 +21,6 @@ export default class Home extends Component {
     };
 
     render() {
-        this.setState({time:""});
         return (
             <div className="Home">
                 <div className="lander">
