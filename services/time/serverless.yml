@@ -37,11 +37,18 @@ custom:
     createRoute53Record: true
 
 functions:
-  get:
+  gettime:
     handler: time.handler
     events:
       - http:
           path: time
+          method: get
+          cors: true
+  gettimesecure:
+    handler: time.handler
+    events:
+      - http:
+          path: timesecure
           method: get
           cors: true
           authorizer: aws_iam
