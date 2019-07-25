@@ -8,23 +8,24 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            time: ""
+            time: "Initial time"
         };
     }
 
-    getTime = async () => {
+    getTime()  {
         let apiName = "";   // TODO: define actual API
         let apiPath = "time";
         let myInit = {};
-        let time =  await API.get(apiName, apiPath, myInit);
-        this.setState({time: time});
+        API.get(apiName, apiPath, myInit).then(response => {
+            this.setState({time: response.data});
+        });
     };
 
     render() {
+        this.getTime();
         return (
             <div className="Home">
                 <div className="lander">
-                    getTime();
                     <h1>Metaphoto</h1>
                     <p>Keep track of all that photographic metadata</p>
                     <p>{this.state.time}</p>
