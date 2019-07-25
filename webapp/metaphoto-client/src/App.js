@@ -13,8 +13,7 @@ class App extends Component {
 
         this.state = {
             isAuthenticated: false,
-            isAuthenticating: true,
-            time: ""
+            isAuthenticating: true
         };
     }
     async componentDidMount() {
