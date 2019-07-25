@@ -13,7 +13,7 @@ export default class Home extends Component {
     }
 
     getTime()  {
-        let apiName = "2dcyvdocsc";
+        let apiName = "dev-metaphoto-time";
         let apiPath = "time";
         let myInit = {};
         API.get(apiName, apiPath, myInit).then(response => {
