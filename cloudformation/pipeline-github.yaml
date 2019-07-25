@@ -209,9 +209,10 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: metaphoto-webapp/buildspec.yml
 
-  CodePipeline:
+  ApiCodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
+      Name: MetaphotoApiPipeline
       ArtifactStore:
         Type: S3
         Location: !Ref MetaphotoPipelineArtifactsBucket
@@ -237,6 +238,32 @@ Resources:
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
 
+        - Name: BuildAndDeploy
+          Actions:
+            - Name: Api
+              RunOrder: 1
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              InputArtifacts:
+                - Name: ApiSourceCode
+              Configuration:
+                ProjectName: !Ref ApiCodeBuildProject
+
+  WebappCodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: MetaphotoWebappPipeline
+      ArtifactStore:
+        Type: S3
+        Location: !Ref MetaphotoPipelineArtifactsBucket
+      RestartExecutionOnUpdate: true
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      Stages:
+        - Name: Source
+          Actions:
             - Name: WebappSource
               InputArtifacts: []
               ActionTypeId:
@@ -256,18 +283,6 @@ Resources:
 
         - Name: BuildAndDeploy
           Actions:
-            - Name: Api
-              RunOrder: 1
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              InputArtifacts:
-                - Name: ApiSourceCode
-              Configuration:
-                ProjectName: !Ref ApiCodeBuildProject
-
             - Name: WebApp
               RunOrder: 1
               ActionTypeId:
@@ -292,9 +307,9 @@ Resources:
       Filters:
         - JsonPath: "$.ref"
           MatchEquals: refs/heads/{Branch}
-      TargetPipeline: !Ref CodePipeline
+      TargetPipeline: !Ref ApiCodePipeline
       TargetAction: ApiSource
-      TargetPipelineVersion: !GetAtt CodePipeline.Version
+      TargetPipelineVersion: !GetAtt ApiCodePipeline.Version
 
   WebappGithubWebhook:
     Type: 'AWS::CodePipeline::Webhook'
@@ -306,9 +321,9 @@ Resources:
       Filters:
         - JsonPath: "$.ref"
           MatchEquals: refs/heads/{Branch}
-      TargetPipeline: !Ref CodePipeline
+      TargetPipeline: !Ref WebappCodePipeline
       TargetAction: WebappSource
-      TargetPipelineVersion: !GetAtt CodePipeline.Version
+      TargetPipelineVersion: !GetAtt WebappCodePipeline.Version
 
   CodeBuildRole:
     Type: "AWS::IAM::Role"
