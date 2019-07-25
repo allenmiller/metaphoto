@@ -15,7 +15,6 @@ export default class Home extends Component {
 
     render() {
         this.setState({time:""});
-
         return (
             <div className="Home">
                 <div className="lander">
