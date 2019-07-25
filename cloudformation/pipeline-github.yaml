@@ -220,7 +220,7 @@ Resources:
       Stages:
         - Name: Source
           Actions:
-            - Name: Source
+            - Name: ApiSource
               InputArtifacts: []
               ActionTypeId:
                 Category: Source
@@ -282,7 +282,7 @@ Resources:
               Configuration:
                 ProjectName: !Ref WebAppCodeBuildProject
 
-  GithubWebhook:
+  ApiGithubWebhook:
     Type: 'AWS::CodePipeline::Webhook'
     Properties:
       Authentication: GITHUB_HMAC
@@ -293,7 +293,21 @@ Resources:
         - JsonPath: "$.ref"
           MatchEquals: refs/heads/{Branch}
       TargetPipeline: !Ref CodePipeline
-      TargetAction: Source
+      TargetAction: ApiSource
+      TargetPipelineVersion: !GetAtt CodePipeline.Version
+
+  WebappGithubWebhook:
+    Type: 'AWS::CodePipeline::Webhook'
+    Properties:
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubOAuthToken
+      RegisterWithThirdParty: 'true'
+      Filters:
+        - JsonPath: "$.ref"
+          MatchEquals: refs/heads/{Branch}
+      TargetPipeline: !Ref CodePipeline
+      TargetAction: WebappSource
       TargetPipelineVersion: !GetAtt CodePipeline.Version
 
   CodeBuildRole:
