@@ -13,7 +13,7 @@ export default class Home extends Component {
     }
 
     getTime()  {
-        let apiName = "";   // TODO: define actual API
+        let apiName = "https://2dcyvdocsc.execute-api.us-west-2.amazonaws.com/dev";   // TODO: define actual API
         let apiPath = "time";
         let myInit = {};
         API.get(apiName, apiPath, myInit).then(response => {
