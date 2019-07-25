@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./Home.css";
 
-import { API } from "aws-amplify";
+import Amplify, { API } from "aws-amplify";
 
 export default class Home extends Component {
 
@@ -13,7 +13,18 @@ export default class Home extends Component {
     }
 
     getTime()  {
-        let apiName = "dev-metaphoto-time";
+        export const apiConfig = {
+            API: {
+                endpoints: [
+                    {
+                        name: "timeApi",
+                        endpoint: "https://2dcyvdocsc.execute-api.us-west-2.amazonaws.com/dev"
+                    }
+                ]
+            }
+        };
+        Amplify.configure(apiConfig);
+        let apiName = "timeApi";
         let apiPath = "time";
         let myInit = {};
         API.get(apiName, apiPath, myInit).then(response => {
