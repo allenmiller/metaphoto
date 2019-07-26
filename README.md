@@ -11,4 +11,4 @@ Manual actions needed:
 
     https://www.npmjs.com/package/serverless-domain-manager
 
- - Create Certificate in us-east-1 for use by cloudfront
+ - Create the Cloudformation stack for theCertificate in us-east-1 for use by cloudfront
