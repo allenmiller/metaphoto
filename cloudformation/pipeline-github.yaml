@@ -211,6 +211,8 @@ Resources:
             Value: !Ref MetaphotoDataBucket
           - Name: REACT_APP_API_URL
             Value: !ImportValue MetaphotoApiUrl  # Cross-stack dependency
+          - Name: REACT_APP_ENV
+            Value: !Ref Environment
       Source:
         Type: CODEPIPELINE
         BuildSpec: metaphoto-webapp/buildspec.yml
