@@ -685,6 +685,11 @@ Outputs:
     Export:
       Name: MediaTableArn
 
+  MediaTableName:
+    Value: !Ref MediaTable
+    Export:
+      Name: MediaTableName
+
   Region:
     Value: !Ref AWS::Region
     Export:
