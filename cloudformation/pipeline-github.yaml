@@ -63,19 +63,19 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
-  MediaTable:
+  MediaDynamoDbTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Join ["-", [metaphoto, !Ref Environment]]
+      TableName: !Join ["-", [metaphoto-dynamodb, !Ref Environment]]
       AttributeDefinitions:
-        - AttributeName: mediaId
+        - AttributeName: primaryKey
           AttributeType: S
-        - AttributeName: mediaType
+        - AttributeName: sortKey
           AttributeType: S
       KeySchema:
-        - AttributeName: mediaId
+        - AttributeName: primaryKey
           KeyType: HASH
-        - AttributeName: mediaType
+        - AttributeName: sortKey
           KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -513,6 +513,7 @@ Resources:
             - lambda:PublishVersion
             - lambda:RemovePermission
             - lambda:UpdateFunctionCode
+            - lambda:UpdateFunctionConfiguration
             - Route53:ListHostedZones
             - Route53:ChangeResourceRecordSets
             - Route53:GetHostedZone
@@ -681,12 +682,12 @@ Outputs:
       Name: TlsCertificateArn
 
   MediaTableArn:
-    Value: !GetAtt MediaTable.Arn
+    Value: !GetAtt MediaDynamoDbTable.Arn
     Export:
       Name: MediaTableArn
 
   MediaTableName:
-    Value: !Ref MediaTable
+    Value: !Ref MediaDynamoDbTable
     Export:
       Name: MediaTableName
 
