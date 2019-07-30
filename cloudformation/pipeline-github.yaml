@@ -473,7 +473,7 @@ Resources:
             - S3:PutObject
             - S3:DeleteObject
             - S3:PutObjectAcl
-          Resource: !Ref MetaphotoPipelineArtifactsBucket
+          Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket ]]
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref ApiCodeBuildRole
