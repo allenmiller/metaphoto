@@ -60,6 +60,11 @@ Parameters:
     Default: 1
     Description: DynamoDB write capacity
 
+  DynamoDBTableName:
+    Type: String
+    Default: metaphoto-dynamodb
+    Description: Dynamo table name, concatinated with -dev
+
 Resources:
   MetaphotoPipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -76,20 +81,20 @@ Resources:
   MediaDynamoDbTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Join ["-", [metaphoto-dynamodb, !Ref Environment]]
+      TableName: !Join ["-", [!Ref DynamoDBTableName, !Ref Environment]]
       AttributeDefinitions:
-        - AttributeName: primaryKey
+        - AttributeName: primaryHashKey
           AttributeType: S
-        - AttributeName: sortKey
+        - AttributeName: primaryRangeKey
           AttributeType: S
         - AttributeName: gsi1HashKey
           AttributeType: S
         - AttributeName: gsi1RangeKey
           AttributeType: S
       KeySchema:
-        - AttributeName: primaryKey
+        - AttributeName: primaryHashKey
           KeyType: HASH
-        - AttributeName: sortKey
+        - AttributeName: primaryRangeKey
           KeyType: RANGE
       GlobalSecondaryIndexes:
         - IndexName: GSI_1
