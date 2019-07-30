@@ -471,6 +471,7 @@ Resources:
             - S3:GetBucketLocation
             - S3:GetObject
             - S3:PutObject
+            - S3:DeleteObject
             - S3:PutObjectAcl
           Resource: "*"
       Roles:
