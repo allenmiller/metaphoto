@@ -473,7 +473,7 @@ Resources:
             - S3:PutObject
             - S3:DeleteObject
             - S3:PutObjectAcl
-          Resource: "*"
+          Resource: !Ref MetaphotoPipelineArtifactsBucket
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref ApiCodeBuildRole
