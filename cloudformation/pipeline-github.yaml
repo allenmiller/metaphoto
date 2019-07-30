@@ -50,6 +50,16 @@ Parameters:
     Type: String
     Description: ARN of certificate in us-east-1 for use by Cloudfront
 
+  ReadCapacityUnits:
+    Type: String
+    Default: 1
+    Description: DynamoDB read capacity
+
+  WriteCapacityUnits:
+    Type: String
+    Default: 1
+    Description: DynamoDB write capacity
+
 Resources:
   MetaphotoPipelineArtifactsBucket:
     Type: AWS::S3::Bucket
@@ -72,14 +82,30 @@ Resources:
           AttributeType: S
         - AttributeName: sortKey
           AttributeType: S
+        - AttributeName: gsi1HashKey
+          AttributeType: S
+        - AttributeName: gsi1RangeKey
+          AttributeType: S
       KeySchema:
         - AttributeName: primaryKey
           KeyType: HASH
         - AttributeName: sortKey
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI_1
+          KeySchema:
+            - AttributeName: gsi1HashKey
+              KeyType: HASH
+            - AttributeName: gsi1RangeKey
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref ReadCapacityUnits
+            WriteCapacityUnits: !Ref WriteCapacityUnits
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: !Ref ReadCapacityUnits
+        WriteCapacityUnits: !Ref WriteCapacityUnits
 
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
