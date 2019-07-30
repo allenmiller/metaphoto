@@ -488,7 +488,7 @@ Resources:
         - !Ref DynamoDbCodeBuildRole
         - !Ref ApiCodeBuildRole
 
-  S3PutGetPolicy:
+  S3BuildRolesPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
       PolicyName:
@@ -496,15 +496,21 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          Effect: Allow
-          Action:
-            - S3:ListBucket
-            - S3:GetBucketLocation
-            - S3:GetObject
-            - S3:PutObject
-            - S3:DeleteObject
-            - S3:PutObjectAcl
-          Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket, "/*" ]]
+          - Effect: Allow
+            Action:
+              - S3:GetBucketLocation
+            Resource: "arn:aws:s3:::*"
+          - Effect: Allow
+            Action:
+              - S3:ListBucket
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket]]
+          - Effect: Allow
+            Action:
+              - S3:GetObject
+              - S3:PutObject
+              - S3:DeleteObject
+              - S3:PutObjectAcl
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket, "/*" ]]
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref ApiCodeBuildRole
