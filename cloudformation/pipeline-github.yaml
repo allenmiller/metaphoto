@@ -63,7 +63,7 @@ Parameters:
   DynamoDBTableName:
     Type: String
     Default: metaphoto-dynamodb
-    Description: Dynamo table name, concatinated with -dev
+    Description: Dynamo table name, concatinated with -{Environment}
 
 Resources:
   MetaphotoPipelineArtifactsBucket:
@@ -205,7 +205,7 @@ Resources:
       TimeoutInMinutes: 5
       Source:
         Type: CODEPIPELINE
-        BuildSpec: api/time/buildspec.yml
+        BuildSpec: api/buildspec.yml
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
