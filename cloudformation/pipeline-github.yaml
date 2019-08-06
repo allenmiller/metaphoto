@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Shared infrastructure for Metaphoto, including build pipelines, dynamodb tables, S3 buckets, and IAM roles
 
+Mappings:
+  DynamoDb:
+    Gsi1Name:
+      Name: GSI_1
+
 Parameters:
   Environment:
     AllowedValues:
@@ -97,7 +102,7 @@ Resources:
         - AttributeName: primaryRangeKey
           KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: GSI_1
+        - IndexName: !FindInMap [DynamoDb, Gsi1Name, Name]
           KeySchema:
             - AttributeName: gsi1HashKey
               KeyType: HASH
@@ -728,6 +733,11 @@ Outputs:
     Value: !Ref MediaDynamoDbTable
     Export:
       Name: MediaTableName
+
+  MediaTableGSI1:
+    Value: !FindInMap [DynamoDb, Gsi1Name, Name]
+    Export:
+      Name: MediaTableGSI1
 
   Region:
     Value: !Ref AWS::Region
