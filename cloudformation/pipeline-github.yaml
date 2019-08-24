@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Shared infrastructure for Metaphoto, including build pipelines, dynamodb tables, S3 buckets, and IAM roles
+Description: Shared infrastructure for Tanker, including build pipelines, dynamodb tables, S3 buckets, and IAM roles
 
 Mappings:
   DynamoDb:
@@ -29,12 +29,12 @@ Parameters:
 
   GitHubApiRepo:
     Type: String
-    Default: metaphoto-api
+    Default: tanker-api
     AllowedPattern: "[A-Za-z0-9-]+"
 
   GitHubWebappRepo:
     Type: String
-    Default: metaphoto-webapp
+    Default: tanker-webapp
     AllowedPattern: "[A-Za-z0-9-]+"
 
   GitHubBranch:
@@ -44,12 +44,12 @@ Parameters:
 
   ApplicationStackName:
     Type: String
-    Default: metaphoto
+    Default: tanker
     AllowedPattern: "[A-Za-z0-9-]+"
 
   HostedZoneDnsName:
     Type: String
-    Default: metaphoto.ajmiller.net
+    Default: tank.ajmiller.net
 
   UsEast1CertificateArn:
     Type: String
@@ -67,17 +67,17 @@ Parameters:
 
   DynamoDBTableName:
     Type: String
-    Default: metaphoto-dynamodb
+    Default: tanker-dynamodb
     Description: Dynamo table name, concatinated with -{Environment}
 
 Resources:
-  MetaphotoPipelineArtifactsBucket:
+  TankerPipelineArtifactsBucket:
     Type: AWS::S3::Bucket
     Properties:
       VersioningConfiguration:
         Status: Enabled
 
-  MetaphotoDataBucket:
+  TankerDataBucket:
     Type: AWS::S3::Bucket
     Properties:
       VersioningConfiguration:
@@ -122,7 +122,7 @@ Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Join ["-", [metaphoto-user-pool, !Ref Environment]]
+      UserPoolName: !Join ["-", [tanker-user-pool, !Ref Environment]]
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
@@ -131,7 +131,7 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Join ["-", [metaphoto-user-pool-client, !Ref Environment]]
+      ClientName: !Join ["-", [tanker-user-pool-client, !Ref Environment]]
       UserPoolId:
         Ref: CognitoUserPool
       ExplicitAuthFlows:
@@ -141,28 +141,28 @@ Resources:
   CognitoIdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      IdentityPoolName: !Join ["_", [MetaphotoIdentityPool, !Ref Environment]]
+      IdentityPoolName: !Join ["_", [TankerIdentityPool, !Ref Environment]]
       AllowUnauthenticatedIdentities: false
       CognitoIdentityProviders:
         - ClientId: !Ref CognitoUserPoolClient
           ProviderName: !GetAtt CognitoUserPool.ProviderName
 
-  MetaphotoHostedZone:
+  TankerHostedZone:
     Type: AWS::Route53::HostedZone
     Properties:
       HostedZoneConfig:
-        Comment: Hosted zone for metaphoto
+        Comment: Hosted zone for tanker
       Name: !Ref HostedZoneDnsName
 
-  MetaphotoRoute53RecordSet:
+  TankerRoute53RecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      Comment: Record set for metaphoto.
-      HostedZoneId: !Ref MetaphotoHostedZone
+      Comment: Record set for tanker.
+      HostedZoneId: !Ref TankerHostedZone
       Name: !Ref HostedZoneDnsName
       Type: A
       AliasTarget:
-        DNSName: !GetAtt MetaphotoDistribution.DomainName
+        DNSName: !GetAtt TankerDistribution.DomainName
         HostedZoneId: Z2FDTNDATAQYW2  # See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget-1.html
 
   TlsCertificate:
@@ -174,13 +174,13 @@ Resources:
         - !Join [".", ["*", !Ref HostedZoneDnsName]]
         - !Ref HostedZoneDnsName
 
-  MetaphotoDistribution:
+  TankerDistribution:
     Type: "AWS::CloudFront::Distribution"
     Properties:
       DistributionConfig:
         PriceClass: PriceClass_100
         Aliases:
-          - metaphoto.ajmiller.net
+          - !Ref HostedZoneDnsName
         ViewerCertificate:
           AcmCertificateArn: !Ref UsEast1CertificateArn
           MinimumProtocolVersion: TLSv1.2_2018
@@ -188,8 +188,8 @@ Resources:
         Origins:
           -
             # Use the DeployBucket as the CDN origin
-            DomainName: !GetAtt MetaphotoPipelineArtifactsBucket.DomainName
-            Id: !Ref MetaphotoPipelineArtifactsBucket
+            DomainName: !GetAtt TankerPipelineArtifactsBucket.DomainName
+            Id: !Ref TankerPipelineArtifactsBucket
             S3OriginConfig:
               OriginAccessIdentity: ''
         DefaultRootObject: index.html
@@ -200,14 +200,14 @@ Resources:
           MaxTTL: 31536000  # 1 year
           ForwardedValues:
             QueryString: true
-          TargetOriginId: !Ref MetaphotoPipelineArtifactsBucket
+          TargetOriginId: !Ref TankerPipelineArtifactsBucket
           ViewerProtocolPolicy: "redirect-to-https"   # we want to force HTTPS
 
   ApiCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: ApiCodeBuildProject
-      Description: Set up the metaphoto API
+      Name: TankerApiCodeBuildProject
+      Description: Set up the tanker API
       ServiceRole: !Ref ApiCodeBuildRole
       TimeoutInMinutes: 5
       Source:
@@ -223,7 +223,7 @@ Resources:
   WebAppCodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: WebAppCodeBuildProject
+      Name: TankerWebAppCodeBuildProject
       ServiceRole: !Ref WebAppCodeBuildRole
       Artifacts:
         Type: CODEPIPELINE
@@ -234,9 +234,9 @@ Resources:
         Image: aws/codebuild/nodejs:10.1.0
         EnvironmentVariables:
           - Name: DeployBucket
-            Value: !Ref MetaphotoPipelineArtifactsBucket
+            Value: !Ref TankerPipelineArtifactsBucket
           - Name: Distribution
-            Value: !Ref MetaphotoDistribution
+            Value: !Ref TankerDistribution
           - Name: REACT_APP_USER_POOL_ID
             Value: !Ref CognitoUserPool
           - Name: REACT_APP_USER_POOL_CLIENT_ID
@@ -246,22 +246,22 @@ Resources:
           - Name: REACT_APP_REGION
             Value: !Ref AWS::Region
           - Name: REACT_APP_DATA_BUCKET
-            Value: !Ref MetaphotoDataBucket
-          - Name: REACT_APP_API_URL
-            Value: !ImportValue MetaphotoApiUrl  # Cross-stack dependency
+            Value: !Ref TankerDataBucket
+#          - Name: REACT_APP_API_URL
+#            Value: !ImportValue TankerApiUrl  # Cross-stack dependency
           - Name: REACT_APP_ENV
             Value: !Ref Environment
       Source:
         Type: CODEPIPELINE
-        BuildSpec: metaphoto-webapp/buildspec.yml
+        BuildSpec: tanker-webapp/buildspec.yml
 
   ApiCodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      Name: MetaphotoApiPipeline
+      Name: TankerApiPipeline
       ArtifactStore:
         Type: S3
-        Location: !Ref MetaphotoPipelineArtifactsBucket
+        Location: !Ref TankerPipelineArtifactsBucket
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt CodePipelineRole.Arn
       Stages:
@@ -301,10 +301,10 @@ Resources:
   WebappCodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      Name: MetaphotoWebappPipeline
+      Name: TankerWebappPipeline
       ArtifactStore:
         Type: S3
-        Location: !Ref MetaphotoPipelineArtifactsBucket
+        Location: !Ref TankerPipelineArtifactsBucket
       RestartExecutionOnUpdate: true
       RoleArn: !GetAtt CodePipelineRole.Arn
       Stages:
@@ -510,14 +510,14 @@ Resources:
           - Effect: Allow
             Action:
               - S3:ListBucket
-            Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket]]
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref TankerPipelineArtifactsBucket]]
           - Effect: Allow
             Action:
               - S3:GetObject
               - S3:PutObject
               - S3:DeleteObject
               - S3:PutObjectAcl
-            Resource: !Join ["", ["arn:aws:s3:::", !Ref MetaphotoPipelineArtifactsBucket, "/*" ]]
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref TankerPipelineArtifactsBucket, "/*" ]]
       Roles:
         - !Ref DynamoDbCodeBuildRole
         - !Ref ApiCodeBuildRole
@@ -680,7 +680,7 @@ Resources:
                   - Fn::Join:
                       - ''
                       -
-                        - Fn::GetAtt: [MetaphotoDataBucket, Arn]
+                        - Fn::GetAtt: [TankerDataBucket, Arn]
                         - '/private/'
                         - '$'
                         - '{cognito-identity.amazonaws.com:sub}/*'
@@ -694,54 +694,57 @@ Outputs:
   IdentityPoolId:
     Value: !Ref CognitoIdentityPool
 
-  MetaphotoHostedZone:
+  TankerHostedZone:
     Description: Domain name for application
     Value: !Ref HostedZoneDnsName
     Export:
-      Name: MetaphotoHostedZone
+      Name: !Join ['-', [TankerHostedZone, !Ref Environment]]
 
-  MetaphotoPipelineArtifactsBucket:
+  TankerPipelineArtifactsBucket:
     Description: Bucket to hold build artifacts
-    Value: !Ref MetaphotoPipelineArtifactsBucket
+    Value: !Ref TankerPipelineArtifactsBucket
     Export:
-      Name: MetaphotoPipelineArtifactsBucket
+      Name: !Join ['-', [TankerPipelineArtifactsBucket, !Ref Environment]]
 
-  MetaphotoDataBucket:
+  TankerDataBucket:
     Description: Holds application data such as photos, film specs, etc.
-    Value: !Ref MetaphotoDataBucket
+    Value: !Ref TankerDataBucket
     Export:
-      Name: MetaphotoDataBucket
+      Name: !Join ['-', [TankerDataBucket, !Ref Environment]]
 
-  MetaphotoHostedZoneNameServers:
-    Description: Hosted zone for metaphoto.ajmiller.net
+  TankerHostedZoneNameServers:
+    Description: Hosted zone for !Ref HostedZoneDnsName
     Value: !Join
       - ' '
-      - !GetAtt MetaphotoHostedZone.NameServers
+      - !GetAtt TankerHostedZone.NameServers
     Export:
-      Name: MetaphotoHostedZoneNameServers
+      Name: !Join ['-', [TankerHostedZoneNameServers, !Ref Environment]]
 
-  MetaphotoCertificateArn:
+  TankerCertificateArn:
     Description: ARN for the certificate
     Value: !Ref TlsCertificate
     Export:
-      Name: TlsCertificateArn
+      Name: !Join ['-', [TankerTlsCertificateArn, !Ref Environment]]
 
   MediaTableArn:
     Value: !GetAtt MediaDynamoDbTable.Arn
     Export:
-      Name: MediaTableArn
+      Name: !Join ['-', [TankerMediaTableArn, !Ref Environment]]
 
   MediaTableName:
     Value: !Ref MediaDynamoDbTable
     Export:
-      Name: MediaTableName
+      Name: !Join ['-', [TankerMediaTableName, !Ref Environment]]
 
   MediaTableGSI1:
     Value: !FindInMap [DynamoDb, Gsi1Name, Name]
     Export:
-      Name: MediaTableGSI1
+      Name: !Join ['-', [TankerMediaTableGSI1, !Ref Environment]]
 
   Region:
     Value: !Ref AWS::Region
     Export:
-      Name: MetaphotoRegion
+      Name: !Join ['-', [TankerRegion, !Ref Environment]]
+
+  Token:
+    Value: '{{resolve:secretsmanager:GithubToken}}'

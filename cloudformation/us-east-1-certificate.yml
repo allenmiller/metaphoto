@@ -3,10 +3,10 @@ Description: Cloudformation template to create TLS Certificate in us-east-1 need
 
 Parameters:
   DomainName:
-    Description: Domain name for certificate, i.e. "*.metaphoto.ajmiller.net"
+    Description: Domain name for certificate, i.e. "*.tank.ajmiller.net"
     Type: String
   SubjectAlternativeNames:
-    Description: A comma-separated list of SANs, i.e. "metaphoto.ajmiller.net,*.metaphoto.ajmiller.net"
+    Description: A comma-separated list of SANs, i.e. "tank.ajmiller.net,*.tank.ajmiller.net"
     Type: String
 
 Resources:
@@ -18,8 +18,8 @@ Resources:
       SubjectAlternativeNames: !Split [",", !Ref SubjectAlternativeNames]
 
 Outputs:
-  MetaphotoCertificateArn:
+  CertificateArn:
     Description: ARN for the certificate
     Value: !Ref TlsCertificate
     Export:
-      Name: TlsCertificateArn
+      Name: TankTlsCertificateArn
